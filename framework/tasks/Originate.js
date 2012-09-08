@@ -14,13 +14,15 @@ var Originate = function(args, callbackParam, scopeParam, asteriskManagerParam){
     this.run = function (){
         if(originatorNumber === undefined)
             originatorNumber = localUser;
+        remoteNumber = remoteNumber.replace(/ /g, "").replace(/\//g, "").replace(/\-/g, "").replace(/\+/g, "00");
         var action = asteriskManager.commander.createAction('originate');
         action.params = {
             Exten: remoteNumber,
             channel: 'LOCAL/' + localUser,
             context: 'from-internal',
             priority: 1,
-            callerid:  originatorNumber
+            callerid:  originatorNumber,
+            timeout: 10000
         };
         action.execute(originateCallback, this);
     };
