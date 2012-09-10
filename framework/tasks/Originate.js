@@ -18,7 +18,7 @@ var Originate = function(args, callbackParam, scopeParam, asteriskManagerParam){
         var action = asteriskManager.commander.createAction('originate');
         action.params = {
             Exten: remoteNumber,
-            channel: 'LOCAL/' + localUser,
+            channel: 'SIP/' + localUser,
             context: 'from-internal',
             priority: 1,
             callerid:  originatorNumber,
