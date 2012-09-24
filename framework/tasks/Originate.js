@@ -14,7 +14,7 @@ var Originate = function(args, callbackParam, scopeParam, asteriskManagerParam){
     this.run = function (){
         if(originatorNumber === undefined)
             originatorNumber = localUser;
-        remoteNumber = remoteNumber.replace(/ /g, "").replace(/\//g, "").replace(/\-/g, "").replace(/\+/g, "00");
+        remoteNumber = remoteNumber.replace(/ /g, "").replace(/\//g, "").replace(/\-/g, "").replace(/\+/g, "00").replace("(0)", "").replace(/\(/g, "").replace(/\)/g, "");
         var action = asteriskManager.commander.createAction('originate');
         action.params = {
             Exten: remoteNumber,
