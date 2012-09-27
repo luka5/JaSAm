@@ -7,7 +7,7 @@ var Tunnel= function(args, callbackParam, scopeParam, asteriskManagerParam){
     var asteriskManager = asteriskManagerParam;
 
     this.run = function (){
-        asteriskManager.getAjaxCall().request("GET", asteriskManager.baseUrl, args.urlParams, handleEvent, this);
+        asteriskManager.getTransport().request("GET", asteriskManager.baseUrl, args.urlParams, handleEvent, this);
     };
     
     var handleEvent = function(response){

@@ -30,13 +30,13 @@ JaSAmLoader.loadFile = function (filename, callback){
 JaSAmLoader.basePath = '.';
 JaSAmLoader.rev = 11;
 JaSAmLoader.files = [
+    "core/ListenerHandler.js",
     "core/AjaxCall.js",
     "core/WsCall.js",
     "utils/XmlToJson.js",
     "core/BasicManager.js",   
     "core/AsteriskManager.js",   
     "core/Commander.js",   
-    "core/ListenerHandler.js",   
     "core/EventBuffer.js",   
     "core/EventConnector.js",   
 

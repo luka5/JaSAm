@@ -1,3 +1,5 @@
+var ListenerHandler = require('./ListenerHandler.js').ListenerHandler;
+
 /**
  * 
  */
@@ -64,5 +66,6 @@ var AjaxCall = function(){
         connection.send(postData);                 
     };
 };
+AjaxCall.prototype = new ListenerHandler();
 
 exports.AjaxCall = AjaxCall;

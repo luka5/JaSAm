@@ -9,6 +9,8 @@ var WsCall = function(){
     
     var callbackQueue = {};
     
+    var self = this;
+   
     /**
      * 
      */
@@ -17,7 +19,7 @@ var WsCall = function(){
             return;
         
         window.WebSocket = window.WebSocket || window.MozWebSocket;
-        connection = new WebSocket(connectionUri);
+        connection = new WebSocket(connectionUri);       
         connection.onmessage = onmessage;
         connection.onopen = function(){
                 callback.apply(scope, []);
@@ -27,8 +29,14 @@ var WsCall = function(){
     };
     
     var onclose = function(closeObj){
-        if(closeObj.code == 1006)
-            alert("Telefon-TCP Problem, bitte Seite neuladen.");
+        if(closeObj.code == 1006){
+            connection = null;
+            setTimeout(function(){
+                self.createConnection(function(){
+                    self.propagate();
+                }, self);
+            }, 1000);
+        }
     };
     
     /**

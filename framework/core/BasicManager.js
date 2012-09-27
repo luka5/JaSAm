@@ -1,4 +1,3 @@
-var AjaxCall = require('./AjaxCall.js').AjaxCall;
 var ResponseItem = require('../messages/ResponseItem.js').ResponseItem;
 var Response = require('../messages/Response.js').Response;
 var XmlToJson = require('../utils/XmlToJson.js').XmlToJson;
@@ -9,26 +8,34 @@ var XmlToJson = require('../utils/XmlToJson.js').XmlToJson;
 var BasicManager = function(){
     
     this.baseUrl = '/asterisk/mxml';
-    var ajaxCall = new AjaxCall();
+    var transport = null;
     var parser = null;
     var jsonParser = null;
     var xml2json = (new XmlToJson()).xml2json;
 
     /**
-     * setAjaxCall
+     * setTransport
      * PUBLIC FUNCTION
-     * @param ajaxCallParam <Object> Set specific ajaxCall
+     * @param transportParam <Object> Set specific transport
      */
-    this.setAjaxCall = function(ajaxCallParam){
-        ajaxCall = ajaxCallParam;
+    this.setTransport = function(transportParam){
+        transport = transportParam;
+        
+        transport.addListener(function(){
+            /*
+             * on connect: login if connected
+             */
+            if(this.manager && this.manager.isLoggedIn())
+                this.manager.login();
+        }, this);
     };
     
     /**
-     * getAjaxCall
+     * getTransport
      * PUBLIC FUNCTION
      */
-    this.getAjaxCall = function(){
-        return ajaxCall;
+    this.getTransport = function(){
+        return transport;
     };
     
     /**
@@ -52,8 +59,11 @@ var BasicManager = function(){
         var command = parameter ? parameter : {};
         command.action = action;
 
+        if(transport == null)
+            throw new Error("No transport defined.");
+
         // execute ajax-call with: method, baseUrl, command (Object?!)
-        ajaxCall.request('GET', url, command, function(ajaxResponse){
+        transport.request('GET', url, command, function(ajaxResponse){
             var str, xmlData, jsonDoc;
             if(jsonParser === null){
                 var xmlDoc = null;
