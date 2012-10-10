@@ -11,6 +11,8 @@ var ClassicWorker = function(jaSAmAppParam, validToken, mysqlLogin){
     
     var workerUris = { }; // String URI -> function
     
+    var lastSince;
+    
     this.work = function(request, response){
         try{
             var params = url.parse(request.url, true);
@@ -72,23 +74,52 @@ var ClassicWorker = function(jaSAmAppParam, validToken, mysqlLogin){
             var start = postData.start;
             var limit = postData.limit;
             var extension = postData.extension;
+            var since = postData.since;
+            var blockMultipleQueries = postData.blockMultipleQueries;
             if(start === undefined)
                 start = 0;
             if(limit === undefined)
                 limit = 20;
+            if(blockMultipleQueries === undefined)
+                blockMultipleQueries = false;
 
-            var taskParams = {
-                extension: extension,
-                start: start,
-                limit: limit,
-                mysqlLogin: mysqlLogin
-            };
-            var taskCallback = function(responseObj){
-                executeCallback(responseObj, response);
-            };
-            var task = new CallDetailRecord(taskParams, taskCallback, this, jaSAmApp.getAsteriskManager());
-            task.run();
-            
+            /*
+             * keep lastSince just for 60 secs
+             * otherwise if there is an error receiving and saving this 
+             * the lastSince would lead into a deadlock
+             */
+            if(lastSince !== undefined && lastSince < (new Date()).getTime()/1000 - 60 ){
+                lastSince = undefined;
+            }
+
+            if(blockMultipleQueries && lastSince !== undefined && since <= lastSince){
+                /*
+                 * Block multiple calls with same or older param since
+                 */
+                executeCallback(JSON.stringify({success: true, data: []}), response);
+            }else{
+                
+                var taskParams = {
+                    extension: extension,
+                    start: start,
+                    limit: limit,
+                    mysqlLogin: mysqlLogin,
+                    since: since
+                };
+                var taskCallback = function(responseObj){
+                    /*
+                     * save since as lastSince, if there was a new entry:
+                     * otherwise a call with an empty response would lead to an deadlock.
+                     */
+                    if(JSON.parse(responseObj).total > 0)
+                        lastSince = since;
+                    else
+                        lastSince = undefined;
+                    executeCallback(responseObj, response);
+                };
+                var task = new CallDetailRecord(taskParams, taskCallback, this, jaSAmApp.getAsteriskManager());
+                task.run();
+            }
         });
     };
     
