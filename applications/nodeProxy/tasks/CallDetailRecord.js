@@ -23,7 +23,7 @@ var CallDetailRecord = function(args, callbackParam, scopeParam, asteriskManager
         var query = 'SELECT SQL_CALC_FOUND_ROWS * FROM `cdr` ';
         query += ' WHERE `dst` != "s" ';
         if(since !== undefined)
-            query += " AND UNIX_TIMESTAMP(`calldate`) >= " + since;
+            query += " AND UNIX_TIMESTAMP(`calldate`) > " + since;
         if(extension !== undefined)
             query += ' AND ( ' +
                     ' `src` = "'+extension + '" OR' +
