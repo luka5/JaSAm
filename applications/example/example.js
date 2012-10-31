@@ -42,6 +42,9 @@ function doLogin(){
         //asteriskManager.baseUrl = 'ws://localhost:5859/'; // 'ws://tel.rsu-hausverwalter.de:5859/';
         //asteriskManager.setAjaxCall(new WsCall());
         
+        //Use AjaxCall for Transport
+        asteriskManager.setTransport(new AjaxCall());
+        
         manager.login();
     }catch(exc){
         console.info(exc);
