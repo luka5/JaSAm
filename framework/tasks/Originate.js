@@ -21,7 +21,7 @@ var Originate = function(args, callbackParam, scopeParam, asteriskManagerParam){
             channel: 'SIP/' + localUser,
             context: 'from-internal',
             priority: 1,
-            callerid:  originatorNumber,
+            callerid:  originatorNumber + ' <' + originatorNumber + '>',
             timeout: 10000
         };
         action.execute(originateCallback, this);
