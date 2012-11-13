@@ -28,6 +28,27 @@ var WsCall = function(){
         connection.onclose = onclose;
     };
     
+    this.close = function(){
+        if(connection === null)
+            return;
+        
+        connection.close();
+        connection = null;
+    };
+
+    this.restart = function(callback, scope){
+        this.close();
+        var self = this;
+        setTimeout(function(){
+            self.createConnection(function(){
+                //propagate connection to establish login
+                self.propagate();
+                //call callback
+                callback.apply(scope, arguments);
+            }, scope);
+        }, 1000);
+    };
+    
     var onclose = function(closeObj){
         if(closeObj.code == 1006){
             connection = null;
