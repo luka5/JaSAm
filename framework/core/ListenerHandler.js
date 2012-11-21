@@ -1,6 +1,6 @@
 
 var ListenerHandler = function(){
-    var listeners = new Object();
+    var listeners = new Array();
     var counter = 0;
     
     this.addListener = function(callback, scope){
@@ -30,7 +30,6 @@ var ListenerHandler = function(){
         var fkts = new Object();
         var scopes = new Object();
         var params = arguments;
-        var i = 0;
         for(var key in listeners){
             var listener = listeners[key];
             if(!listener.callback || !listener.scope)
@@ -39,7 +38,15 @@ var ListenerHandler = function(){
             fkts[key] = listener.callback;
             scopes[key] = listener.scope;
             // use setTimeout to resume for
-            setTimeout(function(){ fkts[i].apply(scopes[i], [params]); i++;}, 0);
+            with({key: key}){
+                /*
+                 * we cant use scopes within a setTimeout
+                 * but with provides use a similar functionality
+                 */
+                setTimeout(function(){
+                    fkts[key].apply(scopes[key], [params]);
+                }, 0);   
+            }
         }
     };
 }
