@@ -6,20 +6,20 @@ var ListenerHandler = function(){
     this.addListener = function(callback, scope){
         for(var key in listeners){
             var listener = listeners[key];
-            if(listener.callback == callback){
+            if(listener.callback === callback){
                 // listener already registered
                 return;
             }
         }
         // add new listener
-        listeners[counter] = {callback: callback, scope: scope};
+        listeners.push({callback: callback, scope: scope});
         counter++;
     };
     
     this.removeListener = function(callback){
         for(var key in listeners){
             var listener = listeners[key];
-            if(listener.callback == callback){
+            if(listener.callback === callback){
                     delete listeners[key];
                     counter--;
             }
@@ -31,7 +31,7 @@ var ListenerHandler = function(){
         var scopes = new Object();
         var params = arguments;
         var i = 0;
-        for(var key = 0; key<counter; key++){
+        for(var key in listeners){
             var listener = listeners[key];
             if(!listener.callback || !listener.scope)
                 continue;
