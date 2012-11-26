@@ -2,6 +2,7 @@ var url = require('url');
 var querystring = require('querystring');
 var Exception = require('../../../framework/messages/Exception.js').Exception;
 var Task = require('../../../framework/tasks/Task.js').Task;
+var PushUserMessage = require('../../../framework/tasks/PushUserMessage.js').PushUserMessage;
 var Originate = require('../../../framework/tasks/Originate.js').Originate;
 var CallDetailRecord = require('../tasks/CallDetailRecord.js').CallDetailRecord;
 var Action = require('../../../framework/messages/Action.js').Action;
@@ -124,21 +125,20 @@ var ClassicWorker = function(jaSAmAppParam, validToken, mysqlLogin){
     };
     
     workerUris['sendMessage'] = function(request, response, params){
+        var extensions = params['query']['extensions'];
         var message = params['query']['message'];
         if(message === undefined)
             throw new Error("Param message is missing.");
 
-        var action = new Action(jaSAmApp.getAsteriskManager());
-        action.name = "UserEvent";
-        action.params = {
-            UserEvent: 'message',
-            Header1: message
+        var taskParams = {
+            type: "chat",
+            content: message,
+            extensions: extensions
         };
-        
-        action.execute(function(){
-            executeCallback("", response);
-        }, this);
-    };    
+        var taskCallback = function(responseObj){executeCallback(responseObj, response);};
+        var task = new PushUserMessage(taskParams, taskCallback, this, jaSAmApp.getAsteriskManager());
+        task.run();
+    };
     
     var executeCallback = function (responseObj, httpResponse){
         var httpstatus = 200;
