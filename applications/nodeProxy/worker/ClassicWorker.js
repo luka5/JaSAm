@@ -139,6 +139,19 @@ var ClassicWorker = function(jaSAmAppParam, validToken, mysqlLogin){
         var task = new PushUserMessage(taskParams, taskCallback, this, jaSAmApp.getAsteriskManager());
         task.run();
     };
+
+    workerUris['forceHVReload'] = function(request, response, params){
+        var extensions = params['query']['extensions'];
+
+        var taskParams = {
+            type: "cmd",
+            content: "forceHVReload",
+            extensions: extensions
+        };
+        var taskCallback = function(responseObj){executeCallback(responseObj, response);};
+        var task = new PushUserMessage(taskParams, taskCallback, this, jaSAmApp.getAsteriskManager());
+        task.run();
+    };
     
     var executeCallback = function (responseObj, httpResponse){
         var httpstatus = 200;
