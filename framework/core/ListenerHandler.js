@@ -1,7 +1,6 @@
 
 var ListenerHandler = function(){
     var listeners = new Array();
-    var counter = 0;
     
     this.addListener = function(callback, scope){
         for(var key in listeners){
@@ -13,15 +12,16 @@ var ListenerHandler = function(){
         }
         // add new listener
         listeners.push({callback: callback, scope: scope});
-        counter++;
     };
     
     this.removeListener = function(callback){
         for(var key in listeners){
             var listener = listeners[key];
             if(listener.callback === callback){
-                    delete listeners[key];
-                    counter--;
+                /*
+                 * remove 1 element at index key
+                 */
+                listeners.splice(key, 1);
             }
         }
     };
@@ -41,7 +41,8 @@ var ListenerHandler = function(){
             with({key: key}){
                 /*
                  * we cant use scopes within a setTimeout
-                 * but with provides use a similar functionality
+                 * but with provides a similar functionality
+                 * seems like: key = this.key, if with(this) is set
                  */
                 setTimeout(function(){
                     fkts[key].apply(scopes[key], [params]);
