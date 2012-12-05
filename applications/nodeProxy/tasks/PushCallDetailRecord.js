@@ -1,4 +1,5 @@
 var request = require('request');
+var fs = require('fs');
 var Task = require('../../../framework/tasks/Task.js').Task;
 var CallDetailRecord = require('./CallDetailRecord.js').CallDetailRecord;
 
@@ -59,9 +60,20 @@ var PushCallDetailRecord = function(args, callbackParam, scopeParam, asteriskMan
                                 affectedExtensions = responseObj.affectedExtensions;
                             }
                         }
-                        if(responseObj.output && responseObj.output !== "")
-                            console.log("Non cirtical Error while pushing Cdrs: ",
-                                        responseObj.output);
+                        if(responseObj.output && responseObj.output !== ""){
+                            /*
+                             * save output to persistent file
+                             */
+                            fs.open("log/push.log", 'a+', 0666, function(err, fd){
+                                fs.write(fd, new Date() + responseObj.output,
+                                     null, undefined, function (err, written) {
+                                    if(err)
+                                        console.log("Saving the push output to" 
+                                            + " file named log/push.log failed:",
+                                            arguments);
+                                });
+                            });
+                        }
                     }
                 }
                 callback.apply(scope, [error, lastCallEndDate, affectedExtensions]);
