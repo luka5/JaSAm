@@ -93,7 +93,7 @@ var CallDetailRecord = function(args, callbackParam, scopeParam, asteriskManager
     var fixUnspecificCdrs = function(cdrs){
         var collector = new CallbackCollector(function(){
             var result = {
-                "success": false,
+                "success": true,
                 "data": cdrs
             };
             applyCallback(result);
