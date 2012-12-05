@@ -234,6 +234,32 @@ function sartCDRFixing(){
         
         }else if(event[0].type === 'update'){
             /*
+             * check if channel is ringing extension 
+             */
+            if(channel.bridgedChannelId === null && 
+                    channel.id.indexOf("SIP/QSC") === -1 && channel.getPeer()){
+                var basicExtension = channel.getPeer().getExtension().
+                                        getBasicExtension();
+                if(basicExtension.context === 'ext-local' && 
+                    basicExtension.status === 'ringing'){
+                    /*
+                     * channel is ringing extension
+                     * 
+                     * find incomingChannel which will be bridged and 
+                     * save the extensionid
+                     */
+                    for(var key in incomingChannels){
+                        var incomingChannel = incomingChannels[key];
+                        if(incomingChannel.calleridnum === 
+                                channel.connectedlinenum){
+                            incomingChannel.calledExtension = basicExtension.id;
+                            break;
+                        }
+                    }
+                }
+            }
+        
+            /*
              * check if the updated channel is an incomingChannel 
              * or the one which will be bridged
              */
@@ -241,12 +267,18 @@ function sartCDRFixing(){
                 /*
                  * This channel was a direct Call and is going to be
                  * redirected to a queue and an extension
-                 * this is the same like, if you call the queue direkt except:
+                 * this is the same like, if you call the queue direct except:
                  * the channels property connectedlinenum is set
                  * Its the number with has been Called
+                 * 
+                 * save current timestamp for future evalutaion
                  */
-                incomingQueueChannels[channel.id] = channel;
-                
+                if(!incomingQueueChannels[channel.id]){
+                    delete incomingChannels[channel.id];
+                    channel.uniteTimestamp = (new Date()).getTime()/1000;
+                    incomingQueueChannels[channel.id] = channel;
+                }
+
             }else if(incomingChannels[channel.id]){
                 /*
                  * channel is incomingChannel
@@ -267,23 +299,31 @@ function sartCDRFixing(){
                  * which will be bridged to a incoming queue-call 
                  */
                 for(var key in incomingQueueChannels){
-                    var c = incomingQueueChannels[key];
-                    if(c.calleridnum === channel.connectedlinenum){
+                    var incomingQueueChannel = incomingQueueChannels[key];
+                    if(incomingQueueChannel.calleridnum === 
+                            channel.connectedlinenum){
                         /*
                         * This is the channel of the ringing extension
                         * save the extensionId, because asteriskcdr does not
                         * 
                         * if the call was forwarded after a direct call the param
-                        * c.connectedlinenum is not null
+                        * incomingQueueChannel.calledExtension  and 
+                        * incomingQueueChannel.uniteTimestamp is set
                         * 
                         */
                        var params = {
-                            uniqueid: c.uniqueid,
-                            channelid: c.id,
+                            uniqueid: incomingQueueChannel.uniqueid,
+                            channelid: incomingQueueChannel.id,
                             extension: channel.calleridnum,
-                            calledExtension: c.connectedlinenum,
                             mysqlLogin: configuration.classicHttpServer.mysqlLogin
                         };
+                        if(incomingQueueChannel.calledExtension)
+                            params.calledExtension = 
+                                    incomingQueueChannel.calledExtension;
+                        if(incomingQueueChannel.uniteTimestamp)
+                            params.uniteTimestamp = 
+                                incomingQueueChannel.uniteTimestamp;
+                        
                         var exdrCallback = function(result) {
                             if (!result.success)
                                 console.log("Error setting ExtendedCallDetailRecord. " +
@@ -294,7 +334,7 @@ function sartCDRFixing(){
                                         jaSAmApp.getAsteriskManager());
                         task.run();
                         
-                        delete incomingQueueChannels[c.id];
+                        delete incomingQueueChannels[incomingQueueChannel.id];
                         break;
                     }
                 }

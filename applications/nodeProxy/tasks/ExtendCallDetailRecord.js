@@ -10,6 +10,7 @@ var ExtendCallDetailRecord = function(args, callbackParam, scopeParam, asteriskM
     var channelid = args['channelid'];
     var extension = args['extension'];
     var calledExtension = args['calledExtension'];
+    var uniteTimestamp = args['uniteTimestamp'];
     var mysqlLogin = args['mysqlLogin'];
     
     var client;
@@ -24,12 +25,14 @@ var ExtendCallDetailRecord = function(args, callbackParam, scopeParam, asteriskM
         var insertQuery = "INSERT INTO  `asteriskcdrdb`.`extendedcdr` (" + 
             "`uniqueid` ," +
             "`channel` ," +
-            (calledExtension !== null ? "`calledExtension`," : "") +
+            (calledExtension ? "`calledExtension`," : "") +
+            (uniteTimestamp ? "`uniteTimestamp`," : "") +
             "`extension`" +
         ")" + 
         "VALUES (" +
             "'" + uniqueid + "',  '" + channelid + "', " + 
-            (calledExtension !== null ? " '" + calledExtension + "', " : "") +
+            (calledExtension ? " '" + calledExtension + "', " : "") +
+            (uniteTimestamp ? " " + uniteTimestamp + ", " : "") +
             "'" + extension + "' "+
         ")";
         client.query(

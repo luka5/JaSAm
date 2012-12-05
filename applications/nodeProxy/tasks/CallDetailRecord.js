@@ -44,13 +44,15 @@ var CallDetailRecord = function(args, callbackParam, scopeParam, asteriskManager
                 ' `cdr`.`disposition`, ' +
                 ' `cdr`.`dcontext`, ' +
                 ' `ecdr`.`extension` AS `dstextension`, ' +
-                ' `ecdr`.`calledExtension` AS `calledextension` ' +
+                ' `ecdr`.`calledExtension` AS `calledextension`, ' +
+                ' `ecdr`.`uniteTimestamp` AS `unitetimestamp` ' +
             ' FROM `cdr` ' + 
             ' LEFT OUTER JOIN `extendedcdr` AS `ecdr`' + 
             ' ON ( `ecdr`.`uniqueid` = `cdr`.`uniqueid` AND ' + 
             '      `ecdr`.`channel` = `cdr`.`channel` AND ' + 
             '     ( ' + 
             '        (`ecdr`.`extension` IS NOT NULL AND ' +
+            '        `ecdr`.`uniteTimestamp` IS NOT NULL AND ' +
             '        `ecdr`.`calledExtension` IS NOT NULL )' +
             '        OR ' + 
             '        (`cdr`.`dstchannel` = \'\' AND ' +
@@ -58,7 +60,7 @@ var CallDetailRecord = function(args, callbackParam, scopeParam, asteriskManager
             '     )' +
             '    )' +
             '';
-        query += ' WHERE 1=1';
+        query += ' WHERE 1 ';
         if(since !== undefined)
             query += " AND UNIX_TIMESTAMP(`calldate`)+`duration` >= " + since;
         if(extension !== undefined)
