@@ -24,10 +24,11 @@ var CallDetailRecord = function(args, callbackParam, scopeParam, asteriskManager
          * build sqlquery depending on given params
          * 
          * also read the extendedcdr
-         * there are two reasons:
+         * there are three reasons:
          *   a) the the caller calls a direct number and gets redirected to a 
          *      queue
-         *   b) the the caller calls a queue and hangs up during a ringing 
+         *   b) the caller calls a queue and hangs up during a ringing 
+         *   c) the caller calls beyond the opening hours
          * if none of this is true, the fields will be null
          */
         var query = 'SELECT SQL_CALC_FOUND_ROWS '+
@@ -57,6 +58,9 @@ var CallDetailRecord = function(args, callbackParam, scopeParam, asteriskManager
             '        OR ' + 
             '        (`cdr`.`dstchannel` = \'\' AND ' +
             '        `cdr`.`dcontext` = \'ext-queues\' )' +
+            '        OR ' + 
+            '        (`cdr`.`dstchannel` = \'\' AND ' +
+            '        `cdr`.`dst` = \'hangup\' )' +
             '     )' +
             '    )' +
             '';
