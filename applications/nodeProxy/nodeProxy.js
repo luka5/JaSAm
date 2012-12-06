@@ -279,6 +279,46 @@ function sartCDRFixing(){
                     incomingQueueChannels[channel.id] = channel;
                 }
 
+            }else if(incomingChannels[channel.id] && (
+                    channel.context === "app-announcement-7" || 
+                    channel.context === "app-announcement-8" || 
+                    channel.context === "app-announcement-10" ||
+                    channel.context === "app-announcement-11")){
+                /*
+                 * This this the "beyond opening hours" announcement
+                 * if the caller doesnt hang up during the announcement 
+                 * the asteriskserver does.
+                 * Then we dont know which number was called!+
+                 * => Save the queue to extendedcdr.extension
+                 * 
+                 * after saving (just save once):
+                 * delete channel from incomingChannel list
+                 */
+                var announcementId = channel.context
+                                        .replace(/app\-announcement\-/, '');
+                var queueAnnouncement = {
+                    7: '0',
+                    8: '45',
+                    10: '30',
+                    11: '40'
+                };
+                var params = {
+                        uniqueid: channel.uniqueid,
+                        channelid: channel.id,
+                        extension: queueAnnouncement[announcementId],
+                        mysqlLogin: configuration.classicHttpServer.mysqlLogin
+                    };
+                var exdrCallback = function(result) {
+                    if (!result.success)
+                        console.log("Error setting ExtendedCallDetailRecord. " +
+                                result.errorInfo);
+                };
+                var task = new ExtendCallDetailRecord(params, 
+                                exdrCallback, {}, 
+                                jaSAmApp.getAsteriskManager());
+                task.run();
+                delete incomingChannels[channel.id];
+
             }else if(incomingChannels[channel.id]){
                 /*
                  * channel is incomingChannel
