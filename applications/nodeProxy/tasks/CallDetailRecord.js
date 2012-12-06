@@ -64,7 +64,7 @@ var CallDetailRecord = function(args, callbackParam, scopeParam, asteriskManager
             '     )' +
             '    )' +
             '';
-        query += ' WHERE 1 ';
+        query += ' WHERE `dcontext` NOT LIKE "custom-qscincoming" ';
         if(since !== undefined)
             query += " AND UNIX_TIMESTAMP(`calldate`)+`duration` >= " + since;
         if(extension !== undefined)
