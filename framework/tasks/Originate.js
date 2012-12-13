@@ -7,6 +7,7 @@ var Originate = function(args, callbackParam, scopeParam, asteriskManagerParam){
     var remoteNumber = args['remoteNumber'];
     var localUser = args['extension'];
     var originatorNumber = args['originatorNumber'];
+    var originatorName = args['originatorName'];
     var callback = callbackParam;
     var scope = scopeParam;
     var asteriskManager = asteriskManagerParam;
@@ -14,6 +15,8 @@ var Originate = function(args, callbackParam, scopeParam, asteriskManagerParam){
     this.run = function (){
         if(originatorNumber === undefined)
             originatorNumber = localUser;
+        if(originatorName === undefined)
+            originatorName = originatorNumber;
         remoteNumber = remoteNumber.replace(/ /g, "").replace(/\//g, "").replace(/\-/g, "").replace(/\+/g, "00").replace("(0)", "").replace(/\(/g, "").replace(/\)/g, "");
         var action = asteriskManager.commander.createAction('originate');
         action.params = {
@@ -21,7 +24,7 @@ var Originate = function(args, callbackParam, scopeParam, asteriskManagerParam){
             channel: 'SIP/' + localUser,
             context: 'from-internal',
             priority: 1,
-            callerid:  originatorNumber + ' <' + originatorNumber + '>',
+            callerid:  originatorName + ' <' + originatorNumber + '>',
             timeout: 10000
         };
         action.execute(originateCallback, this);
