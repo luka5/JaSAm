@@ -17,7 +17,26 @@ var Originate = function(args, callbackParam, scopeParam, asteriskManagerParam){
             originatorNumber = localUser;
         if(originatorName === undefined)
             originatorName = originatorNumber;
-        remoteNumber = remoteNumber.replace(/ /g, "").replace(/\//g, "").replace(/\-/g, "").replace(/\+/g, "00").replace("(0)", "").replace(/\(/g, "").replace(/\)/g, "");
+        
+       /*
+        * Modify remotenumber:
+        * - delete whitespaces at front and end
+        * - change (0) to 0, if its first char
+        * - change all + to 00
+        * - delete all (0)
+        * - delete all NaNs
+        * ==> +49 (0) 123 - 45 /6 ==> 0049123456
+        *     und  (0) 123 - 45 /6 ==> 0123456
+        */
+       remoteNumber = remoteNumber.trim();
+       if(remoteNumber.indexOf("(0)") === 0){
+           remoteNumber = 
+               remoteNumber.replace("(0)", "0");
+       }
+       remoteNumber = remoteNumber
+                           .replace(/\+/g, "00")
+                           .replace("(0)", "")
+                           .replace(/[^\d.]/g, "");
         var action = asteriskManager.commander.createAction('originate');
         action.params = {
             Exten: remoteNumber,
